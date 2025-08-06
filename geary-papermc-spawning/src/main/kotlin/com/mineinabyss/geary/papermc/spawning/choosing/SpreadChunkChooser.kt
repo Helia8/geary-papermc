@@ -77,14 +77,19 @@ class SpreadChunkChooser(
             noisyZ.toDouble()
         )
     }
-
     private suspend fun findNearestSq(x: Int, z: Int, database: Database, dao: SpawnLocationsDAO, world: World): Double {
-        return database.read {
+        var minDistSq = Double.MAX_VALUE
+        database.read {
             val loc = Location(world, x.toDouble(), 0.0, z.toDouble())
-            dao.getClosestSpawn(loc, 1000.0)
-                ?.location?.distanceSquared(loc)
-                ?: Double.MAX_VALUE
+            val spawns = dao.getSpawnsNear(loc, 1000.0)
+            for (spawn in spawns) {
+                val dx = spawn.location.x - x
+                val dz = spawn.location.z - z
+                val distSq = dx * dx + dz * dz
+                if (distSq < minDistSq) minDistSq = distSq
+            }
         }
+        return minDistSq
     }
 }
 

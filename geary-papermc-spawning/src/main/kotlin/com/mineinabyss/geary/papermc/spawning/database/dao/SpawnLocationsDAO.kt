@@ -31,7 +31,7 @@ class SpawnLocationsDAO {
         """.trimIndent(),
         location.x, radius, location.y, location.z,
     ).map {
-        SpreadSpawnLocation.fromStatement(this)
+        SpreadSpawnLocation.fromStatement(this, location.world)
     }
 
     /** Counts the number of spawns stored inside a bounding [box] for a given [world]. */
@@ -70,12 +70,12 @@ class SpawnLocationsDAO {
             SELECT id, data, minX, minY, minZ FROM ${locationsView(location.world)}
             WHERE minX > :x - :rad AND minY > :y - :rad AND minZ > :z - :rad
             AND maxX < :x + :rad AND maxY < :y + :rad AND maxZ < :z + :rad
-            ORDER BY square(minX - :x) + square(minY - :y) + square(minZ - :z)
+            ORDER BY (minX - :x) * (minX - :x) + (minY - :y) * (minY - :y) + (minZ - :z)* (minZ - :z)
             LIMIT 1;
             """.trimIndent(),
             x, maxDistance, y, z
         ).firstOrNull {
-            SpreadSpawnLocation.fromStatement(this)
+            SpreadSpawnLocation.fromStatement(this, location.world)
         }
     }
 
@@ -88,7 +88,7 @@ class SpawnLocationsDAO {
         AND maxX < :x + 16 AND maxZ < :z + 16;
         """.trimIndent(),
         chunk.x shl 4, chunk.z shl 4
-    ).map { SpreadSpawnLocation.fromStatement(this) }
+    ).map { SpreadSpawnLocation.fromStatement(this, chunk.world) }
 
     context(tx: WriteTransaction)
     fun insertSpawnLocation(location: Location, store: StoredEntity) {
@@ -107,9 +107,12 @@ class SpawnLocationsDAO {
     }
 
     /** Deletes a stored spawn location by its row [id]. */
+    /** Deletes a stored spawn location by its row [id]. */
     context(tx: WriteTransaction)
     fun deleteSpawnLocation(world: World, id: Int) {
+        // The sqlite library expects vararg parameters, not a map.
         tx.exec("DELETE FROM ${dataTable(world)} WHERE id = :id", id)
+        tx.exec("DELETE FROM ${rtree(world)} WHERE id = :id", id)
     }
 
     context(tx: WriteTransaction)

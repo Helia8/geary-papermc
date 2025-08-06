@@ -22,7 +22,7 @@ class SpreadSpawner(
     private val configs: SpreadSpawnSectionsConfig,
     private val posChooser: InChunkLocationChooser,
     private val chunkChooser: SpreadChunkChooser,
-    private val dao: SpawnLocationsDAO,
+    val dao: SpawnLocationsDAO,
 ) {
     suspend fun spawnSpreadEntities() {
         val container: RegionContainer = WorldGuard.getInstance().platform.regionContainer
