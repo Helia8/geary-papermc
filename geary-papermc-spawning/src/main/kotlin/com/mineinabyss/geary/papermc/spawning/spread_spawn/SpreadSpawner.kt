@@ -53,7 +53,7 @@ class SpreadSpawner(
                 dao.insertSpawnLocation(spawnPos, StoredEntity(config.entry.type.key))
             }
             // Handle case where chunk is loaded by player immediately (without a reload)
-            spread.spawn()
+            spread.spawn(db)
         }
     }
 
