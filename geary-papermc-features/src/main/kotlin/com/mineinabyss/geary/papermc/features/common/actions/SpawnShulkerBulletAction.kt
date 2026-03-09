@@ -76,10 +76,12 @@ class ShulkerBulletHitListener : Listener {
     @EventHandler
     fun ProjectileHitEvent.onProjectileHit() {
         val data = (entity as? ShulkerBullet)?.toGearyOrNull()?.get<ShulkerBulletData>() ?: return
-
         val hitEntity = hitEntity as? LivingEntity ?: return
-        hitEntity.damage(data.damage)
+        this.isCancelled = true;
+
+        hitEntity.damage(data.damage, data.owner)
         hitEntity.removePotionEffect(PotionEffectType.LEVITATION)
         data.effects.forEach(hitEntity::addPotionEffect)
+        entity.remove()
     }
 }
