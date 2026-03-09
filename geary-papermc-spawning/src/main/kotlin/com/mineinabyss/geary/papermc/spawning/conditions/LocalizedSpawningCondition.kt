@@ -13,8 +13,8 @@ import org.bukkit.Location
 @SerialName("geary:spawn_region")
 class LocalizedSpawningCondition(
     val region_name: String,
-    val first_corner: @Serializable(with = LocationAltSerializer::class) Location,
-    val second_corner: @Serializable(with = LocationAltSerializer::class) Location,
+    val first_corner: @Serializable(LocationAltSerializer::class) Location,
+    val second_corner: @Serializable(LocationAltSerializer::class) Location,
 ): Condition {
 
     private val min_xyz = Triple(
