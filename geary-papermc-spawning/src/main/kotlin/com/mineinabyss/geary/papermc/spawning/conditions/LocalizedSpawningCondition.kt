@@ -3,27 +3,29 @@ package com.mineinabyss.geary.papermc.spawning.conditions
 import com.mineinabyss.geary.actions.ActionGroupContext
 import com.mineinabyss.geary.actions.Condition
 import com.mineinabyss.geary.papermc.location
+import com.mineinabyss.idofront.serialization.LocationAltSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import org.bukkit.Location
 
 
 @Serializable
 @SerialName("geary:spawn_region")
 class LocalizedSpawningCondition(
     val region_name: String,
-    val first_corner: Triple<Int, Int, Int>,
-    val second_corner: Triple<Int, Int, Int>,
+    val first_corner: @Serializable(LocationAltSerializer::class) Location,
+    val second_corner: @Serializable(LocationAltSerializer::class) Location,
 ): Condition {
 
     private val min_xyz = Triple(
-        minOf(first_corner.first, second_corner.first),
-        minOf(first_corner.second, second_corner.second),
-        minOf(first_corner.third, second_corner.third)
+        minOf(first_corner.x, second_corner.x),
+        minOf(first_corner.y, second_corner.y),
+        minOf(first_corner.z, second_corner.z)
     )
     private val max_xyz = Triple(
-        maxOf(first_corner.first, second_corner.first),
-        maxOf(first_corner.second, second_corner.second),
-        maxOf(first_corner.third, second_corner.third)
+        maxOf(first_corner.x, second_corner.x),
+        maxOf(first_corner.y, second_corner.y),
+        maxOf(first_corner.z, second_corner.z)
     )
     override fun ActionGroupContext.execute(): Boolean {
         val location = location ?: return false
