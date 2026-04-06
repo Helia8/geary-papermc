@@ -1,0 +1,59 @@
+package com.mineinabyss.geary.papermc.spawning.config
+
+import com.mineinabyss.idofront.serialization.LocationAltSerializer
+import kotlinx.serialization.EncodeDefault
+import kotlinx.serialization.Serializable
+import org.bukkit.Location
+
+
+@Serializable
+// Definition of a single spawn location, a "region" if you may
+class SpawnLocationConfig(
+
+    @EncodeDefault(EncodeDefault.Mode.NEVER)
+    val group: String? = null, // group tag of the location
+
+
+    //aabb definition of the location
+    val locMin:@Serializable(LocationAltSerializer::class) Location,
+    val locMax: @Serializable(LocationAltSerializer::class) Location,
+
+    // radius definition of the location (override)
+    val center: @Serializable(LocationAltSerializer::class) Location? = null,
+    val radius: Int? = null,
+    val radiusY: Int? = null,
+
+    val gearySpawnOverride: Boolean = false,
+
+)
+{
+    fun isInside(location: Location): Boolean {
+        if (center != null && radius != null) {
+            val dx = location.x - center.x
+            val dz = location.z - center.z
+
+            val horizontalDistSq = dx * dx + dz * dz
+            val radiusSq = radius * radius
+
+            if (radiusY != null) {
+                val dy = kotlin.math.abs(location.y - center.y)
+                return horizontalDistSq <= radiusSq && dy <= radiusY
+            }
+
+            return horizontalDistSq <= radiusSq
+        }
+
+        return location.x >= locMin.x && location.x <= locMax.x &&
+                location.y >= locMin.y && location.y <= locMax.y &&
+                location.z >= locMin.z && location.z <= locMax.z
+    }
+}
+
+
+// definition of the spawnable custom locations
+@Serializable
+class SpawnLocationsConfig(
+    val Locations: Map<String, SpawnLocationConfig>, // id to location
+) {
+
+}
