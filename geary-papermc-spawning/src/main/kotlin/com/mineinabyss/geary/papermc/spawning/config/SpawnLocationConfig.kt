@@ -1,5 +1,6 @@
 package com.mineinabyss.geary.papermc.spawning.config
 
+import com.mineinabyss.idofront.config.ConfigEntryWithKey
 import com.mineinabyss.idofront.serialization.LocationAltSerializer
 import kotlinx.serialization.EncodeDefault
 import kotlinx.serialization.Serializable
@@ -53,7 +54,24 @@ class SpawnLocationConfig(
 // definition of the spawnable custom locations
 @Serializable
 class SpawnLocationsConfig(
-    val Locations: Map<String, SpawnLocationConfig>, // id to location
+    val Locations: Map<String, SpawnLocationConfig> = emptyMap(), // id to location
 ) {
+
+}
+
+class SpawnLocationsUnified(configs: List<ConfigEntryWithKey<SpawnLocationsConfig>>) {
+    val unified = mutableMapOf<String, SpawnLocationConfig>()
+
+    init {
+        for (config in configs) {
+            for ((id, location) in config.entry.Locations) {
+                if (unified.containsKey(id)) {
+                    println("Warning: Duplicate spawn location ID '$id' found in config '${config.key}'. Skipping this entry.")
+                    continue
+                }
+                unified[id] = location;
+            }
+        }
+    }
 
 }
